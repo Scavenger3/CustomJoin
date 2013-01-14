@@ -138,20 +138,25 @@ namespace CustomJoin
 		{
 			try
 			{
-				if (e.MsgID == PacketTypes.ChatText && e.Handled == false && LastJoinIndex > -1 && LastJoinIndex < TShock.Players.Length && e.text.EndsWith(" has joined.") && e.number2 == Color.Yellow.R && e.number3 == Color.Yellow.G && e.number4 == Color.Yellow.B)
+				if (e.MsgID == PacketTypes.ChatText && e.Handled == false && LastJoinIndex > -1)
 				{
-					var tsplr = TShock.Players[LastJoinIndex];
-					LastJoinIndex = -1;
-
-					if (tsplr == null) return;
-
-					if (cfg.CustomMessages.ContainsKey(tsplr.Name))
+					if (LastJoinIndex < TShock.Players.Length && e.text.EndsWith(" has joined.") && e.number2 == Color.Yellow.R && e.number3 == Color.Yellow.G && e.number4 == Color.Yellow.B)
 					{
-						if (cfg.CustomMessages[tsplr.Name].HideJoin)
-							e.Handled = true;
-						else if (cfg.CustomMessages[tsplr.Name].JoinMessage != string.Empty)
-							e.text = string.Format(cfg.CustomMessages[tsplr.Name].JoinMessage, tsplr.Name, tsplr.Country ?? string.Empty);
+						var tsplr = TShock.Players[LastJoinIndex];
+						LastJoinIndex = -1;
+
+						if (tsplr == null) return;
+
+						if (cfg.CustomMessages.ContainsKey(tsplr.Name))
+						{
+							if (cfg.CustomMessages[tsplr.Name].HideJoin)
+								e.Handled = true;
+							else if (cfg.CustomMessages[tsplr.Name].JoinMessage != string.Empty)
+								e.text = string.Format(cfg.CustomMessages[tsplr.Name].JoinMessage, tsplr.Name, tsplr.Country ?? string.Empty);
+						}
 					}
+					else
+						LastJoinIndex = -1;
 				}
 			}
 			catch { }
