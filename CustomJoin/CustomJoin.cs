@@ -55,39 +55,61 @@ namespace CustomJoin
 
 		void CMDsetjoin(CommandArgs args)
 		{
-			if (args.Parameters.Count < 1)
+			if (args.Parameters.Count < 1 || args.Parameters.Count > 2)
 			{
-				args.Player.SendWarningMessage("Usage: /setjoin <text / hide / reset>");
+				args.Player.SendWarningMessage("Usage: /setjoin [player] \"<text / hide / reset>\"");
 				return;
 			}
 
-			string message = string.Join(" ", args.Parameters);
+			var Ply = args.Player;
+			string message = args.Parameters[0];
+			if (args.Parameters.Count == 2)
+			{
+				var PlySearch = TShock.Utils.FindPlayer(args.Parameters[0]);
+				if (PlySearch.Count != 1)
+				{
+					args.Player.SendWarningMessage(string.Concat(PlySearch.Count < 1 ? "Less" : "More", " than one player matched!"));
+					return;
+				}
+				Ply = PlySearch[0];
+				message = args.Parameters[1];
+			}
 
-			if (!cfg.CustomMessages.ContainsKey(args.Player.Name))
-				cfg.CustomMessages.Add(args.Player.Name, new cfgMessage());
+			if (!cfg.CustomMessages.ContainsKey(Ply.Name))
+				cfg.CustomMessages.Add(Ply.Name, new cfgMessage());
 
 			switch (message.ToLower())
 			{
 				case "hide":
-					cfg.CustomMessages[args.Player.Name].HideJoin = true;
-					cfg.CustomMessages[args.Player.Name].JoinMessage = string.Empty;
-					args.Player.SendMessage("Your join message will not be shown!", Color.MediumSeaGreen);
+					cfg.CustomMessages[Ply.Name].HideJoin = true;
+					cfg.CustomMessages[Ply.Name].JoinMessage = string.Empty;
+					Ply.SendMessage("Your join message will not be shown!", Color.MediumSeaGreen);
+					if (Ply != args.Player)
+						args.Player.SendMessage(string.Concat(Ply.Name, "'s join message will not be shown!"), Color.MediumSeaGreen);
 					break;
 				case "reset":
-					if (cfg.CustomMessages[args.Player.Name].HideLeave == false && cfg.CustomMessages[args.Player.Name].LeaveMessage == string.Empty)
-						cfg.CustomMessages.Remove(args.Player.Name);
+					if (cfg.CustomMessages[Ply.Name].HideLeave == false && cfg.CustomMessages[Ply.Name].LeaveMessage == string.Empty)
+						cfg.CustomMessages.Remove(Ply.Name);
 					else
 					{
-						cfg.CustomMessages[args.Player.Name].HideJoin = false;
-						cfg.CustomMessages[args.Player.Name].JoinMessage = string.Empty;
+						cfg.CustomMessages[Ply.Name].HideJoin = false;
+						cfg.CustomMessages[Ply.Name].JoinMessage = string.Empty;
 					}
-					args.Player.SendMessage("Using default TShock join message!", Color.MediumSeaGreen);
+					Ply.SendMessage("Removed your custom join message!", Color.MediumSeaGreen);
+					if (Ply != args.Player)
+						args.Player.SendMessage(string.Concat("Removed ", Ply.Name, "'s custom join message!"), Color.MediumSeaGreen);
 					break;
 				default:
-					cfg.CustomMessages[args.Player.Name].HideJoin = false;
-					cfg.CustomMessages[args.Player.Name].JoinMessage = message;
-					args.Player.SendMessage("Your join message is now:", Color.MediumSeaGreen);
-					args.Player.SendInfoMessage(string.Format(cfg.CustomMessages[args.Player.Name].JoinMessage, args.Player.Name, args.Player.Country ?? string.Empty));
+					cfg.CustomMessages[Ply.Name].HideJoin = false;
+					cfg.CustomMessages[Ply.Name].JoinMessage = message;
+					string Message = string.Format(cfg.CustomMessages[Ply.Name].JoinMessage, Ply.Name, Ply.Country ?? string.Empty);
+					Ply.SendMessage("Your join message is now:", Color.MediumSeaGreen);
+					Ply.SendInfoMessage(Message);
+					if (Ply != args.Player)
+					{
+						args.Player.SendMessage(string.Concat(Ply.Name, "'s join message is now:"), Color.MediumSeaGreen);
+						args.Player.SendInfoMessage(Message);
+					}
 					break;
 			}
 
@@ -95,44 +117,67 @@ namespace CustomJoin
 		}
 		void CMDsetleave(CommandArgs args)
 		{
-			if (args.Parameters.Count < 1)
+			if (args.Parameters.Count < 1 || args.Parameters.Count > 2)
 			{
-				args.Player.SendWarningMessage("Usage: /setleave <message / hide / reset>");
+				args.Player.SendWarningMessage("Usage: /setleave [player] \"<text / hide / reset>\"");
 				return;
 			}
 
-			string message = string.Join(" ", args.Parameters);
+			var Ply = args.Player;
+			string message = args.Parameters[0];
+			if (args.Parameters.Count == 2)
+			{
+				var PlySearch = TShock.Utils.FindPlayer(args.Parameters[0]);
+				if (PlySearch.Count != 1)
+				{
+					args.Player.SendWarningMessage(string.Concat(PlySearch.Count < 1 ? "Less" : "More", " than one player matched!"));
+					return;
+				}
+				Ply = PlySearch[0];
+				message = args.Parameters[1];
+			}
 
-			if (!cfg.CustomMessages.ContainsKey(args.Player.Name))
-				cfg.CustomMessages.Add(args.Player.Name, new cfgMessage());
+			if (!cfg.CustomMessages.ContainsKey(Ply.Name))
+				cfg.CustomMessages.Add(Ply.Name, new cfgMessage());
 
 			switch (message.ToLower())
 			{
 				case "hide":
-					cfg.CustomMessages[args.Player.Name].HideLeave = true;
-					cfg.CustomMessages[args.Player.Name].LeaveMessage = string.Empty;
-					args.Player.SendMessage("Your leave message will not be shown!", Color.MediumSeaGreen);
+					cfg.CustomMessages[Ply.Name].HideLeave = true;
+					cfg.CustomMessages[Ply.Name].LeaveMessage = string.Empty;
+					Ply.SendMessage("Your leave message will not be shown!", Color.MediumSeaGreen);
+					if (Ply != args.Player)
+						args.Player.SendMessage(string.Concat(Ply.Name, "'s leave message will not be shown!"), Color.MediumSeaGreen);
 					break;
 				case "reset":
-					if (cfg.CustomMessages[args.Player.Name].HideJoin == false && cfg.CustomMessages[args.Player.Name].JoinMessage == string.Empty)
-						cfg.CustomMessages.Remove(args.Player.Name);
+					if (cfg.CustomMessages[Ply.Name].HideJoin == false && cfg.CustomMessages[Ply.Name].JoinMessage == string.Empty)
+						cfg.CustomMessages.Remove(Ply.Name);
 					else
 					{
-						cfg.CustomMessages[args.Player.Name].HideLeave = false;
-						cfg.CustomMessages[args.Player.Name].LeaveMessage = string.Empty;
+						cfg.CustomMessages[Ply.Name].HideLeave = false;
+						cfg.CustomMessages[Ply.Name].LeaveMessage = string.Empty;
 					}
-					args.Player.SendMessage("Using default TShock leave message!", Color.MediumSeaGreen);
+					Ply.SendMessage("Removed your custom leave message!", Color.MediumSeaGreen);
+					if (Ply != args.Player)
+						args.Player.SendMessage(string.Concat("Removed ", Ply.Name, "'s custom leave message!"), Color.MediumSeaGreen);
 					break;
 				default:
-					cfg.CustomMessages[args.Player.Name].HideLeave = false;
-					cfg.CustomMessages[args.Player.Name].LeaveMessage = message;
-					args.Player.SendMessage("Your join message is now:", Color.MediumSeaGreen);
-					args.Player.SendInfoMessage(string.Format(cfg.CustomMessages[args.Player.Name].LeaveMessage, args.Player.Name, args.Player.Country ?? string.Empty));
+					cfg.CustomMessages[Ply.Name].HideLeave = false;
+					cfg.CustomMessages[Ply.Name].LeaveMessage = message;
+					string Message = string.Format(cfg.CustomMessages[Ply.Name].LeaveMessage, Ply.Name, Ply.Country ?? string.Empty);
+					Ply.SendMessage("Your leave message is now:", Color.MediumSeaGreen);
+					Ply.SendInfoMessage(Message);
+					if (Ply != args.Player)
+					{
+						args.Player.SendMessage(string.Concat(Ply.Name, "'s leave message is now:"), Color.MediumSeaGreen);
+						args.Player.SendInfoMessage(Message);
+					}
 					break;
 			}
 
 			cfg.Write();
 		}
+		
 
 		void onSendData(SendDataEventArgs e)
 		{
